@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>库存管理后台</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>库存修改</h1>
+    
+    <div id="productList"></div>
+    
+    <script>
+        const supabase = createClient(
+            "https://ilwwxtegausytgqfxchw.supabase.co",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlsd3d4dGVnYXVzeXRncWZ4Y2h3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk5ODAxODUsImV4cCI6MjA1NTU1NjE4NX0.hlOtE9u9SQwdSavADPLRaTO4U9s39z5uytG1AdnL1-I"
+        );
+
+        // 加载商品列表
+        async function loadProducts() {
+            const { data, error } = await supabase
+                .from('products')
+                .select('*');
+            
+            let html = '';
+            data.forEach(product => {
+                html += `
+                <div class="product-item">
+                    <h3>${product.name} (${product.sku})</h3>
+                    <input type="number" 
+                           id="stock_${product.id}" 
+                           value="${product.stock}"
+                           min="0">
+                    <button onclick="updateStock(${product.id})">保存</button>
+                </div>`;
+            });
+            document.getElementById('productList').innerHTML = html;
+        }
+
+        // 更新库存
+        async function updateStock(productId) {
+            const newStock = document.getElementById(`stock_${productId}`).value;
+            
+            const { error } = await supabase
+                .from('products')
+                .update({ stock: newStock })
+                .eq('id', productId);
+            
+            if (!error) alert('更新成功！');
+        }
+
+        // 初始化加载
+        loadProducts();
+    </script>
+</body>
+</html>
